@@ -1,0 +1,73 @@
+<body>
+  <h1>Draw on 8x8 Grid</h1>
+  <div class="grid" id="grid">
+    <!-- Grille 8x8 de pixels -->
+  </div>
+  <div class="color-picker">
+    <label for="colorPicker">Pick a color: </label>
+    <input type="color" id="colorPicker">
+  </div>
+  <button id="sendData">Send Data to Arduino</button>
+
+  <script>
+    const grid = document.getElementById('grid');
+    const sendDataButton = document.getElementById('sendData');
+    const colorPicker = document.getElementById('colorPicker');
+    
+    // Créer la grille 8x8
+    const pixels = [];
+    for (let i = 0; i < 64; i++) {
+      const pixel = document.createElement('div');
+      pixel.classList.add('pixel');
+      pixel.dataset.index = i;
+      pixel.addEventListener('click', () => changePixelColor(pixel));
+      grid.appendChild(pixel);
+      pixels.push(pixel);
+    }
+
+    // Fonction pour changer la couleur d'un pixel
+    function changePixelColor(pixel) {
+      const selectedColor = colorPicker.value;  // Récupère la couleur sélectionnée
+      pixel.style.backgroundColor = selectedColor;
+    }
+
+    // Fonction pour envoyer les données RGB à Arduino via Bluetooth
+    sendDataButton.addEventListener('click', () => {
+      let colors = [];
+      pixels.forEach(pixel => {
+        const color = pixel.style.backgroundColor || '#ffffff';  // Si pas de couleur, par défaut blanc
+        colors.push(color);
+      });
+
+      // Convertir la liste de couleurs en format RGB
+      let rgbValues = colors.map(color => {
+        const rgb = hexToRgb(color);
+        return rgb ? [rgb.r, rgb.g, rgb.b] : [255, 255, 255];  // Valeur par défaut blanche
+      });
+
+      // Convertir les valeurs RGB en une chaîne JSON à envoyer
+      const message = JSON.stringify(rgbValues);
+      sendViaBluetooth(message);  // Fonction à implémenter pour envoyer via Bluetooth
+    });
+
+    // Fonction pour convertir hex couleur en RGB
+    function hexToRgb(hex) {
+      let r = 0, g = 0, b = 0;
+      if (hex.length === 7) {
+        r = parseInt(hex[1] + hex[2], 16);
+        g = parseInt(hex[3] + hex[4], 16);
+        b = parseInt(hex[5] + hex[6], 16);
+      }
+      return { r, g, b };
+    }
+
+    // Fonction pour envoyer les données via Bluetooth
+    function sendViaBluetooth(message) {
+      // Cette fonction doit être implémentée pour envoyer les données via Bluetooth
+      // Exemple avec BluetoothSerial.write (Android) ou Web Bluetooth API (Web)
+      console.log("Sending message: ", message);
+      // BluetoothSerial.write(message);  // Exemple pour Android
+    }
+  </script>
+</body>
+</html>
